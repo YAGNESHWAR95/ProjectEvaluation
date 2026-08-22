@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Build output
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Uploads (if large/generated)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
