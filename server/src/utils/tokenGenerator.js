@@ -1,7 +1,13 @@
 const jwt = require('jsonwebtoken');
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access_secret_123456_key_to_be_replaced';
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret_987654_key_to_be_replaced';
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+
+if (!ACCESS_SECRET || !REFRESH_SECRET) {
+  throw new Error(
+    'FATAL: JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be set in environment variables. Server cannot start without them.'
+  );
+}
 
 const generateAccessToken = (user) => {
   return jwt.sign(
@@ -32,6 +38,4 @@ module.exports = {
   generateRefreshToken,
   verifyAccessToken,
   verifyRefreshToken,
-  ACCESS_SECRET,
-  REFRESH_SECRET,
 };

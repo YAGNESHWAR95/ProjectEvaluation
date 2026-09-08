@@ -1,3 +1,4 @@
+const fs = require('fs');
 const crypto = require('crypto');
 const Project = require('../models/Project');
 const Deadline = require('../models/Deadline');
@@ -116,7 +117,7 @@ const submitProject = async (req, res, next) => {
   }
 };
 
-// Retrieve Projects based on roles
+// Retrieve Projects based on roles (with pagination)
 const getProjects = async (req, res, next) => {
   try {
     let query = {};
@@ -130,15 +131,28 @@ const getProjects = async (req, res, next) => {
     }
     // Admin gets all projects (query is empty)
 
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const skip = (page - 1) * limit;
+
+    const total = await Project.countDocuments(query);
     const projects = await Project.find(query)
       .populate('teamMembers', 'name email rollNumber department')
       .populate('assignedFaculty', 'name email facultyId department')
       .populate('deadline', 'title batch submissionEndDate')
-      .sort({ updatedAt: -1 });
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       status: 'success',
       projects,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -237,10 +251,14 @@ const localUploadDirect = (req, res, next) => {
     const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
     const fileUrl = `${serverUrl}/uploads/${req.file.filename}`;
 
+    // Compute SHA-256 hash from actual file content (not filename)
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+
     res.status(200).json({
       status: 'success',
       url: fileUrl,
-      hash: crypto.createHash('sha256').update(req.file.filename).digest('hex'),
+      hash: fileHash,
       originalName: req.file.originalname,
       size: req.file.size,
     });

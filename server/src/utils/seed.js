@@ -47,7 +47,7 @@ const seedData = async () => {
     const admin = await User.create({
       name: 'System Administrator',
       email: 'admin@university.edu',
-      password: 'admin123',
+      password: 'Admin@123',
       role: 'admin',
       department: 'Computer Science',
     });
@@ -56,7 +56,7 @@ const seedData = async () => {
     const faculty1 = await User.create({
       name: 'Dr. Aris Vance',
       email: 'faculty1@university.edu',
-      password: 'faculty123',
+      password: 'Faculty@123',
       role: 'faculty',
       department: 'Computer Science',
       facultyId: 'FAC-701',
@@ -65,7 +65,7 @@ const seedData = async () => {
     const faculty2 = await User.create({
       name: 'Prof. Chloe Mercer',
       email: 'faculty2@university.edu',
-      password: 'faculty123',
+      password: 'Faculty@123',
       role: 'faculty',
       department: 'Information Technology',
       facultyId: 'FAC-702',
@@ -75,7 +75,7 @@ const seedData = async () => {
     const student1 = await User.create({
       name: 'Liam Vance',
       email: 'student1@university.edu',
-      password: 'student123',
+      password: 'Student@123',
       role: 'student',
       department: 'Computer Science',
       rollNumber: 'CS26-001',
@@ -84,7 +84,7 @@ const seedData = async () => {
     const student2 = await User.create({
       name: 'Sophia Vance',
       email: 'student2@university.edu',
-      password: 'student123',
+      password: 'Student@123',
       role: 'student',
       department: 'Computer Science',
       rollNumber: 'CS26-002',
@@ -93,7 +93,7 @@ const seedData = async () => {
     const student3 = await User.create({
       name: 'Ethan Mercer',
       email: 'student3@university.edu',
-      password: 'student123',
+      password: 'Student@123',
       role: 'student',
       department: 'Computer Science',
       rollNumber: 'CS26-003',
@@ -101,9 +101,9 @@ const seedData = async () => {
 
     console.log('User profiles (Admin, Faculty, Students) seeded successfully!');
     console.log('\n--- Test Credentials ---');
-    console.log('1. Admin: admin@university.edu / admin123');
-    console.log('2. Faculty: faculty1@university.edu / faculty123');
-    console.log('3. Student: student1@university.edu / student123 (others student2, student3)');
+    console.log('1. Admin:   admin@university.edu    / Admin@123');
+    console.log('2. Faculty: faculty1@university.edu / Faculty@123');
+    console.log('3. Student: student1@university.edu / Student@123 (others student2, student3)');
     console.log('------------------------');
 
     process.exit(0);

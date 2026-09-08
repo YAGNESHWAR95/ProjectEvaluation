@@ -88,6 +88,34 @@ const submitEvaluation = async (req, res, next) => {
   }
 };
 
+// List evaluations visible to the current user
+const getAllEvaluations = async (req, res, next) => {
+  try {
+    let query = {};
+
+    if (req.user.role === 'student') {
+      const studentProjectIds = await Project.find({ teamMembers: req.user.id }).distinct('_id');
+      query.projectId = { $in: studentProjectIds };
+      query.isPublished = true;
+    } else if (req.user.role === 'faculty') {
+      const facultyProjectIds = await Project.find({ assignedFaculty: req.user.id }).distinct('_id');
+      query.projectId = { $in: facultyProjectIds };
+    }
+
+    const evaluations = await Evaluation.find(query)
+      .populate({ path: 'projectId', select: 'title teamMembers assignedFaculty status' })
+      .populate('evaluatorId', 'name email department')
+      .sort({ updatedAt: -1 });
+
+    res.status(200).json({
+      status: 'success',
+      evaluations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Query evaluations by Project
 const getEvaluationsByProject = async (req, res, next) => {
   try {
@@ -98,7 +126,7 @@ const getEvaluationsByProject = async (req, res, next) => {
     }
 
     // RBAC: Students can only view their own projects' evaluations, faculty/admin can view all
-    if (req.user.role === 'student' && !project.teamMembers.includes(req.user.id)) {
+    if (req.user.role === 'student' && !project.teamMembers.some(m => m.toString() === req.user.id)) {
       return next(new AppError('You are not authorized to view these evaluations', 403));
     }
 
@@ -123,5 +151,6 @@ const getEvaluationsByProject = async (req, res, next) => {
 
 module.exports = {
   submitEvaluation,
+  getAllEvaluations,
   getEvaluationsByProject,
 };

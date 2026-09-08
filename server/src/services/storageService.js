@@ -35,7 +35,7 @@ const generatePresignedUrl = (filename, fileType) => {
 
     return {
       provider: 'cloudinary',
-      uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
       method: 'POST',
       fields: {
         api_key: apiKey,

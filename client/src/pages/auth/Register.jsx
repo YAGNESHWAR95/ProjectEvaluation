@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { validateEmail, validatePassword } from '../../utils/validators';
+import { validateEmail, getPasswordError } from '../../utils/validators';
 
 export default function Register() {
   const { registerUser } = useAuth();
@@ -24,7 +24,8 @@ export default function Register() {
     // Basic Validations
     if (!name.trim()) return setError('Name is required');
     if (!validateEmail(email)) return setError('Please enter a valid email address');
-    if (!validatePassword(password)) return setError('Password must be at least 6 characters long');
+    const passwordError = getPasswordError(password);
+    if (passwordError) return setError(passwordError);
     
     if (role === 'student' && !rollNumber.trim()) {
       return setError('Roll number is required for students');
@@ -111,7 +112,6 @@ export default function Register() {
             >
               <option value="student">Student</option>
               <option value="faculty">Faculty Reviewer</option>
-              <option value="admin">Administrator</option>
             </select>
           </div>
 

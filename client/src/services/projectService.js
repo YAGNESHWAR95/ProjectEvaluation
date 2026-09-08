@@ -37,13 +37,18 @@ export const uploadFileDirectly = async (uploadMetadata, file, onProgress) => {
   // Append binary file
   formData.append(fileKey || 'file', file);
 
+  // Build headers — include auth token for local server uploads
+  const headers = { 'Content-Type': 'multipart/form-data' };
+  const token = sessionStorage.getItem('token');
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await axios({
     url: uploadUrl,
     method: method || 'POST',
     data: formData,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+    headers,
     onUploadProgress: (progressEvent) => {
       if (onProgress && progressEvent.total) {
         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);

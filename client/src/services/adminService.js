@@ -1,5 +1,4 @@
 import api from './api';
-import { API_BASE_URL } from '../utils/constants';
 
 export const getStats = async () => {
   const response = await api.get('/admin/stats');
@@ -26,7 +25,20 @@ export const createDeadline = async (deadlineData) => {
   return response.data.deadline;
 };
 
-export const getExportReportUrl = () => {
-  const token = localStorage.getItem('token');
-  return `${API_BASE_URL}/admin/reports/export?token=${token}`;
+// Securely download CSV export via authenticated API call (no token in URL)
+export const downloadExportReport = async () => {
+  const response = await api.get('/admin/reports/export', {
+    responseType: 'blob',
+  });
+
+  // Create a temporary download link and trigger the browser download
+  const blob = new Blob([response.data], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'evaluations_report.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };

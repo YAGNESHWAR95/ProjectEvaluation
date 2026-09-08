@@ -32,23 +32,43 @@ const getSystemStats = async (req, res, next) => {
       { name: 'Evaluated', value: evaluatedCount }
     ];
 
-    // Chart Data 2: Department-wise submissions
-    const departments = ['Computer Science', 'Information Technology', 'Electronics', 'Mechanical', 'Civil'];
-    const deptStats = await Promise.all(departments.map(async (dept) => {
-      // Find projects where the first team member is from that department (simplification)
-      const count = await Project.countDocuments();
-      // To provide realistic numbers for charts, let's distribute:
-      let mockCount = 0;
-      if (dept === 'Computer Science') mockCount = Math.max(1, Math.round(totalProjects * 0.4));
-      else if (dept === 'Information Technology') mockCount = Math.max(1, Math.round(totalProjects * 0.25));
-      else if (dept === 'Electronics') mockCount = Math.max(1, Math.round(totalProjects * 0.15));
-      else mockCount = Math.max(1, Math.round(totalProjects * 0.1));
-
-      return {
-        department: dept,
-        submissions: mockCount,
-      };
-    }));
+    // Chart Data 2: Real department-wise submissions via aggregation
+    const deptStats = await Project.aggregate([
+      // Unwind team members so we can join with Users
+      { $unwind: '$teamMembers' },
+      // Lookup the user document for each team member
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'teamMembers',
+          foreignField: '_id',
+          as: 'memberInfo',
+        },
+      },
+      { $unwind: '$memberInfo' },
+      // Group by project ID and department (to avoid counting a project multiple times per dept)
+      {
+        $group: {
+          _id: { projectId: '$_id', department: '$memberInfo.department' },
+        },
+      },
+      // Now group by department only to count unique projects per department
+      {
+        $group: {
+          _id: '$_id.department',
+          submissions: { $sum: 1 },
+        },
+      },
+      // Format output
+      {
+        $project: {
+          _id: 0,
+          department: '$_id',
+          submissions: 1,
+        },
+      },
+      { $sort: { submissions: -1 } },
+    ]);
 
     res.status(200).json({
       status: 'success',
@@ -69,13 +89,28 @@ const getSystemStats = async (req, res, next) => {
   }
 };
 
-// List all registered users (Admin only)
+// List all registered users (Admin only) with pagination
 const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const skip = (page - 1) * limit;
+
+    const total = await User.countDocuments();
+    const users = await User.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
     res.status(200).json({
       status: 'success',
       users,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);

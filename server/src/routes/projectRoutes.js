@@ -14,11 +14,13 @@ const upload = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
-// Direct local upload route (emulates cloud direct upload target)
-router.post('/local-upload-direct', upload.single('file'), localUploadDirect);
-
 // Authenticated routes
 router.use(protect);
+
+// Direct local upload route (requires authentication)
+router.post('/local-upload-direct', upload.single('file'), localUploadDirect);
+
+
 
 router.get('/upload-url', getUploadUrl);
 router.get('/students', getStudents);

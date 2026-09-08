@@ -6,6 +6,11 @@ const createDeadline = async (req, res, next) => {
   try {
     const { batch, title, submissionStartDate, submissionEndDate } = req.body;
 
+    // Server-side date validation
+    if (new Date(submissionStartDate) >= new Date(submissionEndDate)) {
+      return next(new AppError('Start date must be before end date', 400));
+    }
+
     // Set other deadlines for the same batch to inactive if they exist
     await Deadline.updateMany({ batch }, { isActive: false });
 

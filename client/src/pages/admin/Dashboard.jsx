@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { getStats, getExportReportUrl } from '../../services/adminService';
+import { getStats, downloadExportReport } from '../../services/adminService';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
-import { Users, FileSpreadsheet, Award, Calendar, FolderGit2, Download, Loader2 } from 'lucide-react';
+import { Users, Award, FolderGit2, Download, Loader2 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -46,14 +47,23 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold tracking-tight">System Analytics</h1>
           <p className="text-[var(--text-secondary)] text-sm">Monitor submission volumes, grading velocities, and cohort distributions.</p>
         </div>
-        <a
-          href={getExportReportUrl()}
-          download
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-500/10"
+        <button
+          onClick={async () => {
+            setExporting(true);
+            try {
+              await downloadExportReport();
+            } catch (err) {
+              console.error('Export failed:', err);
+            } finally {
+              setExporting(false);
+            }
+          }}
+          disabled={exporting}
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-500/10 disabled:opacity-50"
         >
-          <Download className="w-4 h-4" />
+          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
           Export CSV Report
-        </a>
+        </button>
       </div>
 
       {/* Summary Cards Grid */}

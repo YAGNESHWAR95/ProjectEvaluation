@@ -12,7 +12,7 @@ const api = axios.create({
 // Request Interceptor: Attach Access Token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -39,13 +39,16 @@ api.interceptors.response.use(
         );
         
         const { token } = response.data;
-        localStorage.setItem('token', token);
+        sessionStorage.setItem('token', token);
+        localStorage.removeItem('token');
         
         // Re-run the initial request
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return api(originalRequest);
       } catch (refreshError) {
         console.error('Session expired. Logging out...');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         // Redirect to login page

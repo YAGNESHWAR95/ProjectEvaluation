@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { validateEmail, validatePassword } from '../../utils/validators';
+import { validateEmail } from '../../utils/validators';
 
 export default function Login() {
   const { loginUser } = useAuth();
@@ -19,8 +19,8 @@ export default function Login() {
       setError('Please enter a valid email address');
       return;
     }
-    if (!validatePassword(password)) {
-      setError('Password must be at least 6 characters long');
+    if (!password) {
+      setError('Please enter your password');
       return;
     }
 

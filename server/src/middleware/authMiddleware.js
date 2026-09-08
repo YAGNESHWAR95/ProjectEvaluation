@@ -8,12 +8,7 @@ const protect = async (req, res, next) => {
     
     // Check Authorization Header
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[2] || req.headers.authorization.split(' ')[1];
-    }
-
-    // Fallback: check query param (for direct-link downloads like CSV export)
-    if (!token && req.query.token) {
-      token = req.query.token;
+      token = req.headers.authorization.split(' ')[1];
     }
     
     if (!token) {

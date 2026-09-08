@@ -6,10 +6,43 @@ const {
   verifyRefreshToken
 } = require('../utils/tokenGenerator');
 
+// Password strength validation helper
+const validatePasswordStrength = (password) => {
+  if (!password || password.length < 8) {
+    return 'Password must be at least 8 characters long';
+  }
+  if (!/[A-Z]/.test(password)) {
+    return 'Password must contain at least one uppercase letter';
+  }
+  if (!/[0-9]/.test(password)) {
+    return 'Password must contain at least one number';
+  }
+  return null;
+};
+
+// Cookie options helper
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+});
+
 // Register User
 const register = async (req, res, next) => {
   try {
     const { name, email, password, role, department, rollNumber, facultyId } = req.body;
+
+    // Admin accounts cannot be created through registration
+    if (role === 'admin') {
+      return next(new AppError('Admin accounts cannot be created through registration', 403));
+    }
+
+    // Validate password strength
+    const passwordError = validatePasswordStrength(password);
+    if (passwordError) {
+      return next(new AppError(passwordError, 400));
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -63,12 +96,7 @@ const login = async (req, res, next) => {
     const refreshToken = generateRefreshToken(user);
 
     // Set refresh token in HttpOnly Cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie('refreshToken', refreshToken, getCookieOptions());
 
     const userResponse = user.toObject();
     delete userResponse.password;
@@ -118,7 +146,7 @@ const logout = async (req, res, next) => {
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     res.status(200).json({
@@ -133,13 +161,10 @@ const logout = async (req, res, next) => {
 // Get current user profile
 const getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return next(new AppError('User not found', 404));
-    }
+    // req.user is already the full user document from authMiddleware
     res.status(200).json({
       status: 'success',
-      user,
+      user: req.user,
     });
   } catch (error) {
     next(error);
