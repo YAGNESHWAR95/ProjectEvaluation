@@ -4,7 +4,7 @@ import { getProjects } from '../../services/projectService';
 import { getEvaluationsByProject } from '../../services/evaluationService';
 import { getDeadlines } from '../../services/adminService';
 import { formatDate, getStatusBadgeStyle } from '../../utils/formatters';
-import { FileText, Award, Layers, Users, Clock, AlertTriangle, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { FileText, Award, Layers, Users, Clock, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function StudentDashboard() {
   const [project, setProject] = useState(null);
@@ -111,6 +111,13 @@ export default function StudentDashboard() {
           </Link>
         )}
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex gap-3 items-center">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left main section */}

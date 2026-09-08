@@ -174,7 +174,7 @@ export default function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-            placeholder="Min 6 characters"
+            placeholder="Min 8 chars, 1 uppercase, 1 number"
             required
           />
         </div>

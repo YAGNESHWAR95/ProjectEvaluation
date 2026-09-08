@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getUsers, createUser } from '../../services/adminService';
-import { UserCheck, ShieldAlert, Plus, ShieldCheck, Mail, Briefcase, User, Loader2, AlertCircle } from 'lucide-react';
+import { getPasswordError } from '../../utils/validators';
+import { Plus, Loader2, AlertCircle } from 'lucide-react';
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
@@ -43,6 +44,13 @@ export default function ManageUsers() {
   const handleCreateUser = async (e) => {
     e.preventDefault();
     setFormError(null);
+
+    const passwordError = getPasswordError(password);
+    if (passwordError) {
+      setFormError(passwordError);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -89,6 +97,13 @@ export default function ManageUsers() {
           Create Account
         </button>
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex gap-3 items-center">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* User creation form modal */}
       {formOpen && (
@@ -192,7 +207,7 @@ export default function ManageUsers() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-white focus:outline-none"
-                placeholder="Min 6 characters"
+                placeholder="Min 8 chars, 1 uppercase, 1 number"
                 required
               />
             </div>

@@ -12,10 +12,7 @@ import {
   Moon,
   Menu,
   X,
-  FileCheck,
-  ShieldCheck,
-  User,
-  GraduationCap
+  FileCheck
 } from 'lucide-react';
 
 export default function DashboardLayout() {

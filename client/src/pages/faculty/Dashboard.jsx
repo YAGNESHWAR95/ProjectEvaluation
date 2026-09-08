@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getProjects } from '../../services/projectService';
 import { formatDate, getStatusBadgeStyle } from '../../utils/formatters';
 import EvaluateModal from './EvaluateModal';
-import { Search, SlidersHorizontal, BookOpen, AlertCircle, RefreshCw, FileEdit } from 'lucide-react';
+import { Search, BookOpen, AlertCircle, RefreshCw, FileEdit } from 'lucide-react';
 
 export default function FacultyDashboard() {
   const [projects, setProjects] = useState([]);

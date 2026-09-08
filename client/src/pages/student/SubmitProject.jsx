@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { submitProject, getUploadUrl, getStudents } from '../../services/projectService';
+import { submitProject, getStudents } from '../../services/projectService';
 import { getDeadlines } from '../../services/adminService';
 import useFileUpload from '../../hooks/useFileUpload';
-import { Upload, FileText, CheckCircle2, AlertCircle, Trash2, ArrowLeft, Loader2 } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Trash2, ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function SubmitProject() {
   const [title, setTitle] = useState('');
