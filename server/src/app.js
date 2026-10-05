@@ -56,6 +56,9 @@ const deadlineRoutes = require('./routes/deadlineRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const evalRoutes = require('./routes/evalRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const invitationRoutes = require('./routes/invitationRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const complaintRoutes = require('./routes/complaintRoutes');
 const corsOptions = require('./config/corsOptions');
 
 const app = express();
@@ -99,6 +102,14 @@ app.use('/api/deadlines', deadlineRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/evaluations', evalRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/team-invitations', invitationRoutes);
+app.use('/team-invitations', invitationRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/api/complaints', complaintRoutes);
+app.use('/complaints', complaintRoutes);
+app.use('/projects', projectRoutes);
+app.use('/deadlines', deadlineRoutes);
 
 // Fallback for undefined API routes
 app.all('{*path}', (req, res, next) => {

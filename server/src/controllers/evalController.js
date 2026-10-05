@@ -1,5 +1,6 @@
 const Evaluation = require('../models/Evaluation');
 const Project = require('../models/Project');
+const Notification = require('../models/Notification');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
 const { sendEmailAlert } = require('../services/notificationService');
@@ -64,19 +65,33 @@ const submitEvaluation = async (req, res, next) => {
     if (isPublished) {
       if (phase === 'final') {
         project.status = 'evaluated';
+        project.evaluation = evaluation._id;
       } else {
         project.status = 'under_review';
       }
       await project.save();
 
+      // Create in-app notifications for team members
+      for (const member of project.teamMembers) {
+        await Notification.create({
+          recipient: member._id || member,
+          type: 'evaluation_published',
+          title: `Evaluation Published: ${phase.toUpperCase()} Phase`,
+          message: `Your evaluation results for "${project.title}" (${phase} phase) have been published. Total Score: ${calculatedTotal}`,
+          relatedProject: project._id,
+        });
+      }
+
       // Trigger Alert Notification to team members
-      const teamEmails = project.teamMembers.map(m => m.email);
-      await sendEmailAlert(
-        teamEmails.join(','),
-        `New Evaluation Published: ${phase.toUpperCase()} Phase`,
-        `Your evaluation results for phase "${phase.toUpperCase()}" have been published by the reviewer. Total Score: ${calculatedTotal}`,
-        `<p>Your evaluation for <b>${project.title}</b> (${phase}) has been released.</p><b>Total Score: ${calculatedTotal}</b>`
-      );
+      const teamEmails = project.teamMembers.map(m => m.email).filter(Boolean);
+      if (teamEmails.length > 0) {
+        await sendEmailAlert(
+          teamEmails.join(','),
+          `New Evaluation Published: ${phase.toUpperCase()} Phase`,
+          `Your evaluation results for phase "${phase.toUpperCase()}" have been published by the reviewer. Total Score: ${calculatedTotal}`,
+          `<p>Your evaluation for <b>${project.title}</b> (${phase}) has been released.</p><b>Total Score: ${calculatedTotal}</b>`
+        );
+      }
     }
 
     res.status(200).json({

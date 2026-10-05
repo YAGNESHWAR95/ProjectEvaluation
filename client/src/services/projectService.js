@@ -60,7 +60,55 @@ export const uploadFileDirectly = async (uploadMetadata, file, onProgress) => {
   return response.data; // Yields { url, hash, originalName }
 };
 
-// Submit metadata register call
+// Create new project (DRAFT)
+export const createProject = async (projectData) => {
+  const response = await api.post('/projects', projectData);
+  return response.data.project;
+};
+
+// Update project (DRAFT)
+export const updateProject = async (id, projectData) => {
+  const response = await api.put(`/projects/${id}`, projectData);
+  return response.data.project;
+};
+
+// Upload file directly to project with purpose
+export const uploadProjectFile = async (id, file, purpose, onProgress) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('purpose', purpose);
+
+  const response = await api.post(`/projects/${id}/files`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: (progressEvent) => {
+      if (onProgress && progressEvent.total) {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        onProgress(percentCompleted);
+      }
+    },
+  });
+  return response.data;
+};
+
+// Submit draft project (runs plagiarism check, changes status to SUBMITTED)
+export const submitDraftProject = async (id) => {
+  const response = await api.post(`/projects/${id}/submit`);
+  return response.data.project;
+};
+
+// Withdraw project
+export const withdrawProject = async (id) => {
+  const response = await api.post(`/projects/${id}/withdraw`);
+  return response.data;
+};
+
+// Get active deadlines for student
+export const getStudentDeadlines = async () => {
+  const response = await api.get('/projects/deadlines');
+  return response.data.deadlines;
+};
+
+// Submit metadata register call (backward compatibility)
 export const submitProject = async (projectData) => {
   const response = await api.post('/projects/submit', projectData);
   return response.data.project;
@@ -77,3 +125,4 @@ export const getStudents = async () => {
   const response = await api.get('/projects/students');
   return response.data.users;
 };
+
